@@ -103,18 +103,19 @@ const workerstatus = async(req, res) => {
 
         let document = await data.findOne({ date });
         let arr = [];
+        let booked_time = [];
 
         // if there is no document for the date, return all hours as free
         if (!document) {
             arr.push(['0 to 23']);
-            res.status(200).json({"name:": workerData.name, "freetime": arr});
+            res.status(200).json({"name:": workerData.name, "freetime": arr, "booked_time": booked_time});
             return;
         }
 
         // if worker is not present, then all hours are free
         if (!document.hoursData.has(worker_id)) {
             arr.push(['0 to 23']);
-            res.status(200).json({"name:": workerData.name, "freetime": arr});
+            res.status(200).json({"name:": workerData.name, "freetime": arr, "booked_time": booked_time});
             return;
         }
 
@@ -125,6 +126,10 @@ const workerstatus = async(req, res) => {
             if(hourData[i].length === 0 && flag === 0){
                 flag = 1;
                 initial = i;
+            }
+
+            if(hourData[i].length > 0){
+                booked_time.push([`${i} to ${i+1}`]);
             }
 
             if(hourData[i].length > 0 && flag === 1){
@@ -138,7 +143,7 @@ const workerstatus = async(req, res) => {
             arr.push([`${initial} to 23`]);
         }
 
-        res.status(200).json({"name:": workerData.name, "freetime": arr});
+        res.status(200).json({"name:": workerData.name, "freetime": arr, "booked_time": booked_time});
     }
     catch(error) {
         res.status(404).json({ message: error.message });
